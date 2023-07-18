@@ -1,0 +1,13 @@
+name: FlowBasedVisualizationTool
+title: FlowBasedVisualizationTool
+username:
+account: nicoschoutteet
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9471764
+bundleId: 7470915
+url: https://nicoschoutteet.shinyapps.io/FlowBasedVisualizationTool/
+when: 1689690837.25759
+lastSyncTime: 1689690837.25759
+asMultiple: FALSE
+asStatic: FALSE
