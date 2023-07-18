@@ -12,9 +12,10 @@ ui <- fluidPage(
   ),
   titlePanel(tags$p(
     tags$h1("Visualizing the Core day-ahead flow-based market coupling domain"),
-    tags$em("or: slicing 14-dimensional potatoes, see also this "), 
-    tags$em(tags$a("LinkedIn article", 
-                   href = "https://www.linkedin.com/pulse/slicing-12-dimensional-potatoes-visualization-core-nico-schoutteet")))),
+                    tags$em("or: slicing 14-dimensional potatoes, see also this "),
+                    tags$em(tags$a("LinkedIn article", 
+                                   href = "https://www.linkedin.com/pulse/slicing-12-dimensional-potatoes-visualization-core-nico-schoutteet")))
+  ),
   fluidRow(
     column(width = 3,
            h3("Input parameters")),
