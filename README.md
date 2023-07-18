@@ -3,3 +3,11 @@ This repository contains the code for a Shiny app, which can be used to visualiz
 More information can be found via LinkedIn.
 
 The Shiny application is published and can be freely accessed here: https://nicoschoutteet.shinyapps.io/FlowBasedVisualizationTool/
+
+The tool uses a number of functions from the `JAOPuTo` package, which is available through the following repository:
+https://github.com/nicoschoutteet/JAOPuTo
+it can be downloaded and installed with:
+```{r}
+devtools::install_github("nicoschoutteet/JAOPuTo")
+libraries(JAOPuTo)
+```
