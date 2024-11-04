@@ -96,12 +96,12 @@ server <- function(input, output, session) {
   # shadow prices
   output$ActiveConstraints <- renderTable({
     
-    JAOPuTo::JAOPuTo_shadowprices(as.POSIXct(paste0(input$Date, " ", input$Hour, ":00"), tz = "CET"),
-                                  as.POSIXct(paste0(input$Date, " ", input$Hour + 1, ":00"), tz = "CET")) %>% 
-      arrange(-shadowPrice) %>% 
-      mutate(RAM = scales::percent(ram / fmax, accuracy = .1),
-             "Shadow Price" = paste0(round(shadowPrice, 1), " €/MWh")) %>% 
-      select(TSO, CNEC = cnecName, RAM, "Shadow Price") 
+    JAOPuTo::JAOPuTo_Core_shadowprices(as.POSIXct(paste0(input$Date, " ", input$Hour, ":00"), tz = "CET"),
+                                  as.POSIXct(paste0(input$Date, " ", input$Hour, ":00"), tz = "CET")) %>% 
+      arrange(-ShadowPrice) %>% 
+      mutate(RAM = scales::percent(RAM / Fmax, accuracy = .1),
+             "Shadow Price" = paste0(round(ShadowPrice, 1), " €/MWh")) %>% 
+      select(TSO, CNEC = CNE_Name, RAM, "Shadow Price") 
     
   })
   

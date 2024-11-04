@@ -16,22 +16,22 @@ domainvisualization <- function(DateTime,
   # define reference positions for zones (where to slice)
   if (Reference == "MCP") {
     
-    df_slice <- JAOPuTo::JAOPuTo_netpositions(DateTime, DateTime + lubridate::hours(1)) %>%
+    df_slice <- JAOPuTo::JAOPuTo_Core_netpositions(DateTime, DateTime) %>%
       dplyr::mutate(NetPosition = dplyr::case_when(BiddingZone %in% c(BiddingZone1, BiddingZone2) ~ 0,
                                                    TRUE ~ NetPosition))
     
   } else if (Reference == "Zero-balanced") {
     
-    df_slice <- JAOPuTo::JAOPuTo_netpositions(DateTime, DateTime + lubridate::hours(1)) %>%
+    df_slice <- JAOPuTo::JAOPuTo_Core_netpositions(DateTime, DateTime) %>%
       dplyr::mutate(NetPosition = 0)
   }
   
   # download presolved final domains
-  df_finaldomain <- JAOPuTo::JAOPuTo_finaldomain(DateTime, DateTime + lubridate::hours(1)) %>%
-    dplyr::filter(cneEic != "NA")
+  df_finaldomain <- JAOPuTo::JAOPuTo_Core_finalcomputation(DateTime, DateTime) %>%
+    dplyr::filter(CNE_EIC != "NA")
   
   df_finaldomain <- df_finaldomain %>%
-    mutate(Intercept = (ram - ptdf_ALBE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "ALBE"]
+    mutate(Intercept = (RAM - ptdf_ALBE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "ALBE"]
                         - ptdf_ALDE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "ALDE"]
                         - ptdf_AT * df_slice$NetPosition[df_slice$BiddingZoneAbb == "AT"]
                         - ptdf_BE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "BE"]
@@ -48,10 +48,10 @@ domainvisualization <- function(DateTime,
            / df_finaldomain[[paste0("ptdf_", BiddingZoneAbb2)]],
            Slope = - df_finaldomain[[paste0("ptdf_", BiddingZoneAbb1)]] /
              df_finaldomain[[paste0("ptdf_", BiddingZoneAbb2)]]) %>%
-    mutate(CNEC = paste0(cneName, " | ", contName, " - ", direction),
+    mutate(CNEC = paste0(CNE_Name, " | ", C_Name, " - ", Direction),
            Type = "Presolved",
-           Location = ifelse(hubFrom == hubTo, "Internal", "Cross-border"),
-           RAM = ram / fmax) %>%
+           Location = ifelse(BiddingZoneAbbFrom == BiddingZoneAbbTo, "Internal", "Cross-border"),
+           RAM = RAM / Fmax) %>%
     select(CNEC, TSO, Location, Type, Intercept, Slope, RAM) %>%
     filter(!Intercept %in% c("Inf", "NaN", NA))
   
@@ -64,31 +64,31 @@ domainvisualization <- function(DateTime,
                                  RAM = double())
   
   tryCatch({
-    df_activeconstraints <- JAOPuTo::JAOPuTo_shadowprices(DateTime, DateTime + lubridate::hours(1)) %>%
-      dplyr::filter(cnecEic != "NA")
+    df_activeconstraints <- JAOPuTo::JAOPuTo_Core_shadowprices(DateTime, DateTime) %>%
+      dplyr::filter(CNE_EIC != "NA")
     
     df_activeconstraints <- df_activeconstraints %>%
-      mutate(Intercept = (ram - hub_ALBE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "ALBE"]
-                          - hub_ALDE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "ALDE"]
-                          - hub_AT * df_slice$NetPosition[df_slice$BiddingZoneAbb == "AT"]
-                          - hub_BE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "BE"]
-                          - hub_HR * df_slice$NetPosition[df_slice$BiddingZoneAbb == "HR"]
-                          - hub_CZ * df_slice$NetPosition[df_slice$BiddingZoneAbb == "CZ"]
-                          - hub_DE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "DE"]
-                          - hub_FR * df_slice$NetPosition[df_slice$BiddingZoneAbb == "FR"]
-                          - hub_HU * df_slice$NetPosition[df_slice$BiddingZoneAbb == "HU"]
-                          - hub_NL * df_slice$NetPosition[df_slice$BiddingZoneAbb == "NL"]
-                          - hub_PL * df_slice$NetPosition[df_slice$BiddingZoneAbb == "PL"]
-                          - hub_RO * df_slice$NetPosition[df_slice$BiddingZoneAbb == "RO"]
-                          - hub_SK * df_slice$NetPosition[df_slice$BiddingZoneAbb == "SK"]
-                          - hub_SI * df_slice$NetPosition[df_slice$BiddingZoneAbb == "SI"])
-             / df_activeconstraints[[paste0("hub_", BiddingZoneAbb2)]],
-             Slope = - df_activeconstraints[[paste0("hub_", BiddingZoneAbb1)]] /
-               df_activeconstraints[[paste0("hub_", BiddingZoneAbb2)]]) %>%
-      mutate(CNEC = paste0(cnecName, " | ", contName, " - ", direction),
+      mutate(Intercept = (RAM - ptdf_ALBE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "ALBE"]
+                          - ptdf_ALDE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "ALDE"]
+                          - ptdf_AT * df_slice$NetPosition[df_slice$BiddingZoneAbb == "AT"]
+                          - ptdf_BE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "BE"]
+                          - ptdf_HR * df_slice$NetPosition[df_slice$BiddingZoneAbb == "HR"]
+                          - ptdf_CZ * df_slice$NetPosition[df_slice$BiddingZoneAbb == "CZ"]
+                          - ptdf_DE * df_slice$NetPosition[df_slice$BiddingZoneAbb == "DE"]
+                          - ptdf_FR * df_slice$NetPosition[df_slice$BiddingZoneAbb == "FR"]
+                          - ptdf_HU * df_slice$NetPosition[df_slice$BiddingZoneAbb == "HU"]
+                          - ptdf_NL * df_slice$NetPosition[df_slice$BiddingZoneAbb == "NL"]
+                          - ptdf_PL * df_slice$NetPosition[df_slice$BiddingZoneAbb == "PL"]
+                          - ptdf_RO * df_slice$NetPosition[df_slice$BiddingZoneAbb == "RO"]
+                          - ptdf_SK * df_slice$NetPosition[df_slice$BiddingZoneAbb == "SK"]
+                          - ptdf_SI * df_slice$NetPosition[df_slice$BiddingZoneAbb == "SI"])
+             / df_activeconstraints[[paste0("ptdf_", BiddingZoneAbb2)]],
+             Slope = - df_activeconstraints[[paste0("ptdf_", BiddingZoneAbb1)]] /
+               df_activeconstraints[[paste0("ptdf_", BiddingZoneAbb2)]]) %>%
+      mutate(CNEC = paste0(CNE_Name, " | ", C_Name, " - ", Direction),
              Type = "Active",
-             Location = ifelse(hubFrom == hubTo, "Internal", "Cross-border"),
-             RAM = ram / fmax) %>%
+             Location = ifelse(BiddingZoneAbbFrom == BiddingZoneAbbTo, "Internal", "Cross-border"),
+             RAM = RAM / Fmax) %>%
       select(CNEC, TSO, Location, Type, Intercept, Slope, RAM) %>%
       filter(!Intercept %in% c("Inf", "NaN", NA))
   }, error=function(e){})
@@ -97,26 +97,26 @@ domainvisualization <- function(DateTime,
   df_domain <- rbind(df_finaldomain, df_activeconstraints)
   
   # download Core net positions
-  df_netpositions <- JAOPuTo::JAOPuTo_netpositions(DateTime, DateTime + lubridate::hours(1))
+  df_netpositions <- JAOPuTo::JAOPuTo_Core_netpositions(DateTime, DateTime)
   
   # download LTA values and define LTA domain
-  df_LTA <- JAOPuTo::JAOPuTo_LTA(DateTime, DateTime + lubridate::hours(1)) %>%
-    dplyr::filter(substr(Border, 1, 2) %in% c(BiddingZoneAbb1,
+  df_LTA <- JAOPuTo::JAOPuTo_Core_longtermallocations(DateTime, DateTime) %>%
+    dplyr::filter(BiddingZoneAbbFrom %in% c(BiddingZoneAbb1,
                                               BiddingZoneAbb2) |
-                    substr(Border, 6, 7) %in% c(BiddingZoneAbb1,
+                  BiddingZoneAbbTo %in% c(BiddingZoneAbb1,
                                                 BiddingZoneAbb2))
   
   df_LTAdomain <- tibble(Type = rep("LTA", 5),
-                         x = c(sum(df_LTA$LTA[substr(df_LTA$Border, 1, 2) == BiddingZoneAbb1], na.rm = TRUE),
-                               sum(df_LTA$LTA[substr(df_LTA$Border, 1, 2) == BiddingZoneAbb1], na.rm = TRUE),
-                               -sum(df_LTA$LTA[substr(df_LTA$Border, 4, 5) == BiddingZoneAbb1], na.rm = TRUE),
-                               -sum(df_LTA$LTA[substr(df_LTA$Border, 4, 5) == BiddingZoneAbb1], na.rm = TRUE),
-                               sum(df_LTA$LTA[substr(df_LTA$Border, 1, 2) == BiddingZoneAbb1], na.rm = TRUE)),
-                         y = c(-sum(df_LTA$LTA[substr(df_LTA$Border, 4, 5) == BiddingZoneAbb2], na.rm = TRUE),
-                               sum(df_LTA$LTA[substr(df_LTA$Border, 1, 2) == BiddingZoneAbb2], na.rm = TRUE),
-                               sum(df_LTA$LTA[substr(df_LTA$Border, 1, 2) == BiddingZoneAbb2], na.rm = TRUE),
-                               -sum(df_LTA$LTA[substr(df_LTA$Border, 4, 5) == BiddingZoneAbb2], na.rm = TRUE),
-                               -sum(df_LTA$LTA[substr(df_LTA$Border, 4, 5) == BiddingZoneAbb2], na.rm = TRUE))) %>%
+                         x = c(sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbFrom == BiddingZoneAbb1], na.rm = TRUE),
+                               sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbFrom == BiddingZoneAbb1], na.rm = TRUE),
+                               -sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbTo == BiddingZoneAbb1], na.rm = TRUE),
+                               -sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbTo == BiddingZoneAbb1], na.rm = TRUE),
+                               sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbFrom == BiddingZoneAbb1], na.rm = TRUE)),
+                         y = c(-sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbTo == BiddingZoneAbb2], na.rm = TRUE),
+                               sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbFrom == BiddingZoneAbb2], na.rm = TRUE),
+                               sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbFrom == BiddingZoneAbb2], na.rm = TRUE),
+                               -sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbTo == BiddingZoneAbb2], na.rm = TRUE),
+                               -sum(df_LTA$LongTermAllocations[df_LTA$BiddingZoneAbbTo == BiddingZoneAbb2], na.rm = TRUE))) %>%
     sf::st_as_sf(coords = c("x", "y")) %>%
     dplyr::summarize(geometry = sf::st_combine(geometry)) %>%
     sf::st_cast("POLYGON") %>%
